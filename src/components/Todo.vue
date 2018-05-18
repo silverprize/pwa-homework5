@@ -12,7 +12,7 @@
           <a v-for="(tab, index) in tabs" v-bind:key="tab.name" v-bind:class="tab === activeTab ? 'is-active' : ''" @click="changeTab(index)">{{tab.name}}</a>
         </p>
         <div>
-        <div v-for="todo in todoItems" :key="todo.id" class="todo panel-block">
+        <div v-for="todo in viewTodoItems" :key="todo.id" class="todo panel-block">
           <input @change="changeTodoState(todo)" v-bind:checked="todo.state === STATE_COMPLETED" type="checkbox" class="checkbox">
           <div v-show="!todo.editing" @click="enterTodoEdit($event, todo)" style="flex: 1; min-width: 0;">
             <div style="overflow: hidden; text-overflow: ellipsis;">{{todo.subject}}</div>
