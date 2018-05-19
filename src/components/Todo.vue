@@ -13,7 +13,7 @@
         </p>
         <div>
         <div v-for="todo in viewTodoItems" :key="todo.id" class="todo panel-block">
-          <input @change="changeTodoState(todo)" v-bind:checked="todo.state === STATE_COMPLETED" type="checkbox" class="checkbox">
+          <input @change="changeTodoState(todo)" v-bind:checked="todo.state === Values.STATE_COMPLETED" type="checkbox" class="checkbox">
           <div v-show="!todo.editing" @click="enterTodoEdit($event, todo)" style="flex: 1; min-width: 0;">
             <div style="overflow: hidden; text-overflow: ellipsis;">{{todo.subject}}</div>
           </div>
@@ -29,24 +29,25 @@
 </template>
 
 <script>
+import Values from '../model/Values'
+import TodoItem from '../model/TodoItem'
+
 const DATA_ID = 'pwa-homework5'
 const storage = window.localStorage
-const STATE_ACTIVE = 'Active'
-const STATE_COMPLETED = 'Completed'
+
 export default {
   name: 'Todo',
   data () {
     const tabs = [{
       name: 'All'
     }, {
-      name: STATE_ACTIVE
+      name: Values.STATE_ACTIVE
     }, {
-      name: STATE_COMPLETED
+      name: Values.STATE_COMPLETED
     }]
     const todoItems = JSON.parse(storage.getItem(DATA_ID) || '[]')
     return {
-      STATE_ACTIVE,
-      STATE_COMPLETED,
+      Values,
       textInput: '',
       tabs,
       activeTab: tabs[0],
@@ -60,12 +61,7 @@ export default {
         return
       }
 
-      const todo = {
-        id: Math.random(),
-        subject: this.textInput,
-        state: STATE_ACTIVE
-      }
-      this.todoItems.push(todo)
+      this.todoItems.push(new TodoItem(this.textInput))
       this.textInput = ''
       this._updateViewTodoItems()
     },
@@ -75,7 +71,7 @@ export default {
       this._updateViewTodoItems()
     },
     changeTodoState (todo) {
-      todo.state = todo.state === STATE_ACTIVE ? STATE_COMPLETED : STATE_ACTIVE
+      todo.state = todo.state === Values.STATE_ACTIVE ? Values.STATE_COMPLETED : Values.STATE_ACTIVE
       this._updateViewTodoItems()
     },
     changeTab (index) {
