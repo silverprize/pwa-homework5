@@ -12,13 +12,13 @@
           <a v-for="(tab, index) in tabs" v-bind:key="tab.name" v-bind:class="tab === activeTab ? 'is-active' : ''" @click="changeTab(index)">{{tab.name}}</a>
         </p>
         <div>
-        <div v-for="todo in viewTodoItems" :key="todo.id" class="todo panel-block">
+        <div v-for="(todo, index) in viewTodoItems" :key="todo.id" class="todo panel-block">
           <input @change="changeTodoState(todo)" v-bind:checked="todo.state === STATE_COMPLETED" type="checkbox" class="checkbox">
-          <div v-show="!todo.editing" @click="enterTodoEdit($event, todo)" style="flex: 1; min-width: 0;">
+          <div v-show="!todo.editing" @dblclick="enterEditMode(todo, index)" style="flex: 1; min-width: 0;">
             <div style="overflow: hidden; text-overflow: ellipsis;">{{todo.subject}}</div>
           </div>
-          <form v-show="todo.editing" v-on:submit.prevent="todo.editing = false" style="flex: 1; min-width: 0;">
-            <input @blur="todo.editing = false" v-model="todo.subject" class="input is-small" type="text">
+          <form v-show="todo.editing" @submit.prevent="editTodoItem(todo)" style="flex: 1; min-width: 0;">
+            <input ref="editInputBox" @blur="todo.editing = false" v-model="todo.subject" class="input is-small" type="text">
           </form>
           <button @click="deleteTodoItem(todo)" class="is-pulled-right" style="display: block;" type="button">X</button>
         </div>
@@ -33,17 +33,18 @@ const DATA_ID = 'pwa-homework5'
 const storage = window.localStorage
 const STATE_ACTIVE = 'Active'
 const STATE_COMPLETED = 'Completed'
+const tabs = [{
+  name: 'All'
+}, {
+  name: STATE_ACTIVE
+}, {
+  name: STATE_COMPLETED
+}]
+const todoItems = JSON.parse(storage.getItem(DATA_ID) || '[]')
+
 export default {
   name: 'Todo',
   data () {
-    const tabs = [{
-      name: 'All'
-    }, {
-      name: STATE_ACTIVE
-    }, {
-      name: STATE_COMPLETED
-    }]
-    const todoItems = JSON.parse(storage.getItem(DATA_ID) || '[]')
     return {
       STATE_ACTIVE,
       STATE_COMPLETED,
@@ -59,11 +60,11 @@ export default {
       if (!this.textInput) {
         return
       }
-
       const todo = {
         id: Math.random(),
         subject: this.textInput,
-        state: STATE_ACTIVE
+        state: STATE_ACTIVE,
+        editing: false
       }
       this.todoItems.push(todo)
       this.textInput = ''
@@ -83,12 +84,14 @@ export default {
       this.activeTab = tab
       this._updateViewTodoItems()
     },
-    enterTodoEdit ($event, todo) {
-      const input = $event.currentTarget.nextElementSibling.querySelector('input')
-      todo.editing = true
-      this.$nextTick(() => {
-        input.select()
-      })
+    enterEditMode (todo, index) {
+      todo.editing = true;
+      const editInputBox = this.$refs.editInputBox[index];
+      this.$nextTick(() => editInputBox.select());
+    },
+    editTodoItem(todo) {
+      todo.editing = false;
+      storage.setItem(DATA_ID, JSON.stringify(this.todoItems));
     },
     _updateViewTodoItems () {
       if (this.activeTab.name === 'All') {
@@ -101,6 +104,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-</style>
